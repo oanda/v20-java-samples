@@ -53,8 +53,8 @@ public class TestTradesAndOrders {
 		//
 		
 		Context ctx = new Context("https://api-fxtrade.oanda.com",
-        		"38342635a2ffbc7a8bd2c9eabb65b3fa-9403cfa0a08e2415a20603304ef9a256");
-        String accountId = "001-001-15676-002";
+        		"<AUTH_TOKEN>");
+        String accountId = "<ACCOUND_ID>";
         String tradeableInstrument = "EUR_USD";
 
         System.out.println("TEST - GET /accounts");
