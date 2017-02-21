@@ -52,10 +52,9 @@ public class TestTradesAndOrders {
 		// Test a connection
 		//
 		
-		Context ctx = new Context("https://api-fxtrade.oanda.com",
-        		"<AUTH_TOKEN>");
-        String accountId = "<ACCOUND_ID>";
-        String tradeableInstrument = "EUR_USD";
+		Context ctx = new Context(Config.url, Config.token);
+        String accountId = Config.accountId;
+        String tradeableInstrument = Config.instrument;
 
         System.out.println("TEST - GET /accounts");
         System.out.println("CHECK 200 - The list of authorized Accounts has been provided, expecting "+accountId+" in list.");
