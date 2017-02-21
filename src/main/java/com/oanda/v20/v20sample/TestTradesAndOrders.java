@@ -42,8 +42,11 @@ import com.oanda.v20.Transaction;
 import com.oanda.v20.TransactionType;
 
 /**
- * This is a brief test application, demonstrating idiomatic usage of the v20 java library
+ * This is a small sample application that demonstrates idiomatic usage of the v20 java library,
  * including chained method calls and exception handling.
+ * <p>
+ * For a step by step breakdown of the actions of individual requests see {@link StepByStepOrder}
+ * <p>
  * @author Michael Gentili
  */
 public class TestTradesAndOrders {
@@ -65,7 +68,7 @@ public class TestTradesAndOrders {
 					.get_accounts();
 			boolean hasaccount = false;
 	        for (AccountProperties account : accountProperties) {
-	        	if (account.get_id().equals(accountId));
+	        	if (account.get_id().equals(accountId))
 	        		hasaccount = true;
 	        }
 	        if (!hasaccount)
