@@ -1,0 +1,15 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.oanda.v20</groupId>
+  <artifactId>v20sample</artifactId>
+  <version>1.0.0</version>
+  <name>v20sample</name>
+  <description>A simple app to test the v20 java library</description>
+  <dependencies>
+  	<dependency>
+  		<groupId>com.oanda.v20</groupId>
+  		<artifactId>v20</artifactId>
+  		<version>3.0.13</version>
+  	</dependency>
+  </dependencies>
+</project>
