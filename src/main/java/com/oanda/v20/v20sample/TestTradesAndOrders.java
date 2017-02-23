@@ -65,10 +65,10 @@ public class TestTradesAndOrders {
 	        AccountProperties[] accountProperties;
 			accountProperties = ctx.account.list()
 					.execute()
-					.get_accounts();
+					.getAccounts();
 			boolean hasaccount = false;
 	        for (AccountProperties account : accountProperties) {
-	        	if (account.get_id().equals(accountId))
+	        	if (account.getId().equals(accountId))
 	        		hasaccount = true;
 	        }
 	        if (!hasaccount)
@@ -86,10 +86,10 @@ public class TestTradesAndOrders {
         String firstTransId;  // Store the last transaction that happened before this session 
         try {
 	        Account account;
-			account = ctx.account.get(accountId).execute().get_account();
-			firstTransId = account.get_lastTransactionID();
-			if (account.get_balance() <= 0.0)
-				throw new TestFailureException("Account "+accountId+" balance "+account.get_balance()+" <= 0");
+			account = ctx.account.get(accountId).execute().getAccount();
+			firstTransId = account.getLastTransactionID();
+			if (account.getBalance() <= 0.0)
+				throw new TestFailureException("Account "+accountId+" balance "+account.getBalance()+" <= 0");
 		} catch (ClientProtocolException e) {
 			throw new TestFailureException(e);
 		} catch (IOException e) {
@@ -105,10 +105,10 @@ public class TestTradesAndOrders {
         System.out.println ("TEST - GET /accounts/{accountID}/instruments");
         System.out.println ("CHECK 200 - The list of tradeable instruments for the Account has been provided, expecting "+tradeableInstrument+" is tradeable.");
         try {
-			Instrument[] instruments = ctx.account.instruments(accountId).execute().get_instruments();
+			Instrument[] instruments = ctx.account.instruments(accountId).execute().getInstruments();
 			boolean istradeable = false;
 			for (Instrument instrument : instruments) {
-				if (instrument.get_name().equals(tradeableInstrument))
+				if (instrument.getName().equals(tradeableInstrument))
 					istradeable = true;
 			}
 			if (!istradeable)
@@ -125,7 +125,7 @@ public class TestTradesAndOrders {
         System.out.println("CHECK 400 - The Account could not be configured successfully, expecting [must specify parameter] exception.");
 		try {
 			ConfigureResponse result = ctx.account.configure(accountId).execute();
-			throw new TestFailureException("Unexpected Success:" + result.get_clientConfigureTransaction());
+			throw new TestFailureException("Unexpected Success:" + result.getClientConfigureTransaction());
 		} catch (ClientProtocolException e) {
 			throw new TestFailureException(e);
 		} catch (ConfigureRequestException400 e) {
@@ -173,7 +173,7 @@ public class TestTradesAndOrders {
         System.out.println("TEST - GET /accounts/{accountID}/openTrades");
         System.out.println("CHECK 200 - The Account's list of open Trades is provided, expecting 0 open trades.");
         try {
-			Trade[] trades = ctx.trade.listOpen(accountId).execute().get_trades();
+			Trade[] trades = ctx.trade.listOpen(accountId).execute().getTrades();
 			if (trades.length > 0)
 				throw new TestFailureException("Expected 0 open trades, account has "+trades.length);
 		} catch (ClientProtocolException e) {
@@ -191,14 +191,14 @@ public class TestTradesAndOrders {
         try {
 			CreateResponse resp = ctx.order.create(accountId).order(
 						new MarketOrderRequest()
-						.set_instrument(tradeableInstrument)
-						.set_units(10)
+						.setInstrument(tradeableInstrument)
+						.setUnits(10)
 					).execute();
-			Transaction trans = resp.get_orderCreateTransaction();
-			if (trans.get_type() != TransactionType.MARKET_ORDER)
-				throw new TestFailureException("Created order type "+ trans.get_type() + " != MARKET");
-			orderId = resp.get_orderCreateTransaction().get_id();
-			tradeId = resp.get_orderFillTransaction().get_id();
+			Transaction trans = resp.getOrderCreateTransaction();
+			if (trans.getType() != TransactionType.MARKET_ORDER)
+				throw new TestFailureException("Created order type "+ trans.getType() + " != MARKET");
+			orderId = resp.getOrderCreateTransaction().getId();
+			tradeId = resp.getOrderFillTransaction().getId();
 		} catch (ClientProtocolException e) {
 			throw new TestFailureException(e);
 		} catch (CreateRequestException404 e) {
@@ -217,11 +217,11 @@ public class TestTradesAndOrders {
         try {
 			TradeClientExtensionsModifyTransaction trans = ctx.trade.setClientExtensions(accountId, tradeId)
 				.clientExtensions(new ClientExtensions()
-					.set_comment("this is a good trade")
-					.set_tag("good"))
-				.execute().get_tradeClientExtensionsModifyTransaction();
-			if (!trans.get_tradeClientExtensionsModify().get_tag().equals("good"))
-				throw new TestFailureException("Tag "+trans.get_tradeClientExtensionsModify().get_tag()+" != good");
+					.setComment("this is a good trade")
+					.setTag("good"))
+				.execute().getTradeClientExtensionsModifyTransaction();
+			if (!trans.getTradeClientExtensionsModify().getTag().equals("good"))
+				throw new TestFailureException("Tag "+trans.getTradeClientExtensionsModify().getTag()+" != good");
 		} catch (ClientProtocolException e) {
 			throw new TestFailureException(e);
 		} catch (SetclientextensionsRequestException404 e) {
@@ -240,10 +240,10 @@ public class TestTradesAndOrders {
         try {
 			TakeProfitOrderTransaction tp = ctx.trade.setDependentOrders(accountId, tradeId)
 				.takeProfit(new TakeProfitDetails()
-					.set_price(2.0))
-				.execute().get_takeProfitOrderTransaction();
-			if (!tp.get_tradeID().equals(tradeId))
-				throw new TestFailureException("Dependent tradeId "+tp.get_tradeID()+" != "+tradeId);
+					.setPrice(2.0))
+				.execute().getTakeProfitOrderTransaction();
+			if (!tp.getTradeID().equals(tradeId))
+				throw new TestFailureException("Dependent tradeId "+tp.getTradeID()+" != "+tradeId);
 			
 		} catch (ClientProtocolException e) {
 			throw new TestFailureException(e);
@@ -263,10 +263,10 @@ public class TestTradesAndOrders {
         System.out.println("TEST - GET /accounts/{accountID}/orders/{orderSpecifier}");
         System.out.println("CHECK 200 - The details of the Order requested match the order placed, expecting FILLED MARKET order.");
         try {
-			Order order = ctx.order.get(accountId, orderId).execute().get_order();
-			if (order.get_type() != OrderType.MARKET)
-				throw new TestFailureException("Order type "+order.get_type()+" != MARKET");
-			if (order.get_state() != OrderState.FILLED)
+			Order order = ctx.order.get(accountId, orderId).execute().getOrder();
+			if (order.getType() != OrderType.MARKET)
+				throw new TestFailureException("Order type "+order.getType()+" != MARKET");
+			if (order.getState() != OrderState.FILLED)
 				throw new TestFailureException("Order state not filled");
 		} catch (ClientProtocolException e) {
 			throw new TestFailureException(e);
@@ -279,10 +279,10 @@ public class TestTradesAndOrders {
         System.out.println("TEST - GET /accounts/{accountID}/trades");
         System.out.println("CHECK 200 - The list of trades requested, expecting the previously executed order in list.");
         try {
-			Trade[] trades = ctx.trade.list(accountId).execute().get_trades();
+			Trade[] trades = ctx.trade.list(accountId).execute().getTrades();
 			boolean hastrade = false;
 			for (Trade trade : trades) {
-				if (trade.get_id().equals(tradeId)) {
+				if (trade.getId().equals(tradeId)) {
 					hastrade = true;
 					break;
 				}
@@ -301,11 +301,11 @@ public class TestTradesAndOrders {
         System.out.println("TEST - PUT /accounts/{accountID}/trades/{tradeSpecifier}/close");
         System.out.println("CHECK 200 - The Trade has been closed as requested, expecting single close trade.");
         try {
-			TradeReduce[] trades = ctx.trade.close(accountId, tradeId).execute().get_orderFillTransaction().get_tradesClosed();
+			TradeReduce[] trades = ctx.trade.close(accountId, tradeId).execute().getOrderFillTransaction().getTradesClosed();
 			if (trades.length != 1)
 				throw new TestFailureException("Expecting 1 close trade, got "+trades.length);
-			if (!trades[0].get_tradeID().equals(tradeId))
-				throw new TestFailureException("Closed trade "+trades[0].get_tradeID()+ " doesn't match expected "+tradeId);
+			if (!trades[0].getTradeID().equals(tradeId))
+				throw new TestFailureException("Closed trade "+trades[0].getTradeID()+ " doesn't match expected "+tradeId);
 		} catch (ClientProtocolException e) {
 			throw new TestFailureException(e);
 		} catch (CloseRequestException404 e) {
@@ -323,9 +323,9 @@ public class TestTradesAndOrders {
         System.out.println("TEST - GET /accounts/{accountID}/trades/{tradeSpecifier}");
         System.out.println("CHECK 200 - The details for the requested Trade is provided, expecting CLOSED state");
         try {
-			Trade trade = ctx.trade.get(accountId, tradeId).execute().get_trade();
-			if (trade.get_state() != TradeState.CLOSED) 
-				throw new TestFailureException("Trade state "+trade.get_state()+" != CLOSED");
+			Trade trade = ctx.trade.get(accountId, tradeId).execute().getTrade();
+			if (trade.getState() != TradeState.CLOSED) 
+				throw new TestFailureException("Trade state "+trade.getState()+" != CLOSED");
 		} catch (ClientProtocolException e) {
 			throw new TestFailureException(e);
 		} catch (IOException e) {
@@ -338,7 +338,7 @@ public class TestTradesAndOrders {
         System.out.println("CHECK 200 - List of pending Orders for the Account, expecting 0 pending");
         
         try {
-			Order[] orders = ctx.order.listPending(accountId).execute().get_orders();
+			Order[] orders = ctx.order.listPending(accountId).execute().getOrders();
 			if (orders.length > 0) 
 				throw new TestFailureException("Expected 0 pending orders, received "+orders.length);
 		} catch (ClientProtocolException e) {
@@ -354,14 +354,14 @@ public class TestTradesAndOrders {
         try {
 			CreateResponse resp = ctx.order.create(accountId).order(
 						new LimitOrderRequest()
-						.set_instrument(tradeableInstrument)
-						.set_units(10)
-						.set_price(1.0)
+						.setInstrument(tradeableInstrument)
+						.setUnits(10)
+						.setPrice(1.0)
 					).execute();
-			Transaction trans = resp.get_orderCreateTransaction();
-			if (trans.get_type() != TransactionType.LIMIT_ORDER)
-				throw new TestFailureException("Created order type "+ trans.get_type() + " != LIMIT_ORDER");
-			orderId = resp.get_orderCreateTransaction().get_id();
+			Transaction trans = resp.getOrderCreateTransaction();
+			if (trans.getType() != TransactionType.LIMIT_ORDER)
+				throw new TestFailureException("Created order type "+ trans.getType() + " != LIMIT_ORDER");
+			orderId = resp.getOrderCreateTransaction().getId();
 		} catch (ClientProtocolException e) {
 			throw new TestFailureException(e);
 		} catch (CreateRequestException404 e) {
@@ -379,9 +379,9 @@ public class TestTradesAndOrders {
         try {
 			ctx.order.replace(accountId, orderId).order(
 					new StopOrderRequest()
-					.set_instrument(tradeableInstrument)
-					.set_units(10)
-					.set_price(1.0)
+					.setInstrument(tradeableInstrument)
+					.setUnits(10)
+					.setPrice(1.0)
 				).execute();
 			throw new TestFailureException("Unexpected success replacing LimitOrder");
 		} catch (ClientProtocolException e) {
@@ -389,9 +389,9 @@ public class TestTradesAndOrders {
 		} catch (ReplaceRequestException404 e) {
 			throw new TestFailureException(e);
 		} catch (ReplaceRequestException400 e) {
-			System.out.println(e.get_errorCode()+ " " +e.get_errorMessage());
-			if (!e.get_errorCode().equals("REPLACING_ORDER_INVALID")) {
-				throw new TestFailureException("Unexpected errorCode "+e.get_errorCode()+" in expected exception");
+			System.out.println(e.getErrorCode()+ " " +e.getErrorMessage());
+			if (!e.getErrorCode().equals("REPLACING_ORDER_INVALID")) {
+				throw new TestFailureException("Unexpected errorCode "+e.getErrorCode()+" in expected exception");
 			}
 		} catch (IOException e) {
 			throw new TestFailureException(e);
@@ -402,16 +402,16 @@ public class TestTradesAndOrders {
 		try {
 			ReplaceResponse resp = ctx.order.replace(accountId, orderId).order(
 					new LimitOrderRequest()
-					.set_instrument(tradeableInstrument)
-					.set_units(10)
-					.set_price(2.0)
-					.set_takeProfitOnFill(
+					.setInstrument(tradeableInstrument)
+					.setUnits(10)
+					.setPrice(2.0)
+					.setTakeProfitOnFill(
 							new TakeProfitDetails()
-							.set_price(2.0)
+							.setPrice(2.0)
 					)
 				).execute();
-			OrderFillTransaction trans = resp.get_orderFillTransaction();
-			double units = trans.get_tradeOpened().get_units();
+			OrderFillTransaction trans = resp.getOrderFillTransaction();
+			double units = trans.getTradeOpened().getUnits();
 			if (units != 10)
 				throw new TestFailureException("Expected open trade units "+units+" != 10");
 		} catch (ClientProtocolException e) {
@@ -429,13 +429,13 @@ public class TestTradesAndOrders {
         System.out.println("TEST - GET /accounts/{accountID}/orders");
         System.out.println("CHECK 200 - The list of Orders requested, expecting 1 TakeProfit");
         try {
-			Order[] orders = ctx.order.list(accountId).execute().get_orders();
+			Order[] orders = ctx.order.list(accountId).execute().getOrders();
 			if (orders.length != 1)
 				throw new TestFailureException("Expected order count "+orders.length+" != 1");
 			Order order = orders[0];
-			orderId = order.get_id();
-			if (order.get_type() != OrderType.TAKE_PROFIT)
-				throw new TestFailureException("Unexpected Order Type "+order.get_type()+" != TAKE_PROFIT");
+			orderId = order.getId();
+			if (order.getType() != OrderType.TAKE_PROFIT)
+				throw new TestFailureException("Unexpected Order Type "+order.getType()+" != TAKE_PROFIT");
 		} catch (ClientProtocolException e) {
 			throw new TestFailureException(e);
 		} catch (IOException e) {
@@ -447,7 +447,7 @@ public class TestTradesAndOrders {
         System.out.println("TEST - PUT /accounts/{accountID}/orders/{orderSpecifier}/cancel");
         System.out.println("CHECK 200 - The Order was cancelled as specified, expecting cancelled order");
         try {
-			ctx.order.cancel(accountId, orderId).execute().get_orderCancelTransaction();
+			ctx.order.cancel(accountId, orderId).execute().getOrderCancelTransaction();
 		} catch (ClientProtocolException e) {
 			throw new TestFailureException(e);
 		} catch (CancelRequestException404 e) {
@@ -467,12 +467,12 @@ public class TestTradesAndOrders {
         System.out.println("TEST GET /accounts/{accountID}/openPositions");
         System.out.println("CHECK 200 - The Account's open Positions are provided, expecting 1 EUR/USD position of 10 units.");
         try {
-			Position[] positions = ctx.position.listOpen(accountId).execute().get_positions();
+			Position[] positions = ctx.position.listOpen(accountId).execute().getPositions();
 			if (positions.length != 1) 
 				throw new TestFailureException("Position count "+positions.length+" != 1");
 			Position position = positions[0];
-			if (position.get_long().get_units() != 10)
-				throw new TestFailureException("Position units "+position.get_long()+" != 10");
+			if (position.getLong().getUnits() != 10)
+				throw new TestFailureException("Position units "+position.getLong()+" != 10");
 		} catch (ClientProtocolException e) {
 			throw new TestFailureException(e);
 		} catch (IOException e) {
@@ -486,9 +486,9 @@ public class TestTradesAndOrders {
         try {
 			OrderFillTransaction trans = ctx.position.close(accountId, tradeableInstrument)
 					.longUnits("ALL")
-					.execute().get_longOrderFillTransaction();
-			if (trans.get_units() != -10)
-				throw new TestFailureException("Position units "+trans.get_units()+"!= -10");
+					.execute().getLongOrderFillTransaction();
+			if (trans.getUnits() != -10)
+				throw new TestFailureException("Position units "+trans.getUnits()+"!= -10");
 		} catch (ClientProtocolException e) {
 			throw new TestFailureException(e);
 		} catch (com.oanda.v20.Context.PositionContext.CloseRequestException404 e) {
@@ -510,10 +510,10 @@ public class TestTradesAndOrders {
         System.out.println("TEST - GET /accounts/{accountID}/transactions/sinceid");
         System.out.println("CHECK 200 - The requested time range of Transactions are provided, expecting 16 transactions.");
         try {
-			Transaction[] transactions = ctx.transaction.since(accountId).id(firstTransId).execute().get_transactions();
+			Transaction[] transactions = ctx.transaction.since(accountId).id(firstTransId).execute().getTransactions();
 			System.out.println("Executed a total of "+transactions.length+" transactions:");
 			for (Transaction trans : transactions) {
-				System.out.println(trans.get_id() + " " + trans.get_type());
+				System.out.println(trans.getId() + " " + trans.getType());
 			}
 			if (transactions.length != 16)
 				throw new TestFailureException("Number of transactions "+transactions.length+" != 16");

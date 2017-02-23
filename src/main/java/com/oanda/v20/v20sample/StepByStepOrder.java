@@ -41,11 +41,11 @@ public abstract class StepByStepOrder {
 			ListResponse response = request.execute();
 			// Retrieve account list from response object
 	        AccountProperties[] accountProperties;
-			accountProperties = response.get_accounts();
+			accountProperties = response.getAccounts();
 			// Check for the configured account
 			boolean hasaccount = false;
 	        for (AccountProperties account : accountProperties) {
-	        	if (account.get_id().equals(accountId))
+	        	if (account.getId().equals(accountId))
 	        		hasaccount = true;
 	        }
 	        if (!hasaccount)
@@ -63,10 +63,10 @@ public abstract class StepByStepOrder {
 			GetResponse response = request.execute();
 			// Retrieve the contents of the result
 	        Account account;
-			account = response.get_account();
+			account = response.getAccount();
 			// Check the balance
-			if (account.get_balance() <= 0.0)
-				throw new TestFailureException("Account "+accountId+" balance "+account.get_balance()+" <= 0");
+			if (account.getBalance() <= 0.0)
+				throw new TestFailureException("Account "+accountId+" balance "+account.getBalance()+" <= 0");
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -79,16 +79,16 @@ public abstract class StepByStepOrder {
         	// Create the required body parameter
 			MarketOrderRequest marketorderrequest = new MarketOrderRequest();
 			// Populate the body parameter fields
-			marketorderrequest.set_instrument(tradeableInstrument);
-			marketorderrequest.set_units(10);
+			marketorderrequest.setInstrument(tradeableInstrument);
+			marketorderrequest.setUnits(10);
 			// Attach the body parameter to the request
 			request.order(marketorderrequest);
 			// Execute the request and obtain the response object
 			CreateResponse response = request.execute();
 			// Extract the Order Fill transaction for the executed Market Order 
-			OrderFillTransaction transaction = response.get_orderFillTransaction();
+			OrderFillTransaction transaction = response.getOrderFillTransaction();
 			// Extract the trade ID of the created trade from the transaction and keep it for future action
-			tradeId = transaction.get_id();
+			tradeId = transaction.getId();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -100,16 +100,16 @@ public abstract class StepByStepOrder {
         	// Execute the request and retrieve the response object
 			CloseResponse response = request.execute();
 			// Extract the order fill transaction describing the trade close action
-			OrderFillTransaction transaction = response.get_orderFillTransaction();
+			OrderFillTransaction transaction = response.getOrderFillTransaction();
 			// Extract the list of trades that were closed by the request 
-			TradeReduce[] trades = transaction.get_tradesClosed();
+			TradeReduce[] trades = transaction.getTradesClosed();
 			// Check if single trade closed 
 			if (trades.length != 1)
 				throw new TestFailureException("Only 1 trade was expected to be closed");
 			// Extract the single closed trade
 			TradeReduce trade = trades[0];
 			// Check if trade closed was the one we asked to be closed
-			if (!trade.get_tradeID().equals(tradeId))
+			if (!trade.getTradeID().equals(tradeId))
 				throw new TestFailureException("The wrong trade was closed");
 		} catch (Exception e) {
 			throw new RuntimeException(e);
