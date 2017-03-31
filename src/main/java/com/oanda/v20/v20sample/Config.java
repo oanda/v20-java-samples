@@ -1,5 +1,8 @@
 package com.oanda.v20.v20sample;
 
+import com.oanda.v20.account.AccountID;
+import com.oanda.v20.primitives.InstrumentName;
+
 /**
  * This is the configuration object used by the various examples to connect to
  * one of the OANDA trading systems.  Please fill them in with sane values.
@@ -14,6 +17,6 @@ public class Config {
     private Config() {} // Singleton
     public static String url = "";
     public static String token = "";
-    public static String accountId = "";
-    public static String instrument  = "";
+    public static AccountID accountId = new AccountID("");
+    public static InstrumentName instrument  = new InstrumentName("");
 }

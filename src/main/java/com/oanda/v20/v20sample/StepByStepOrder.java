@@ -1,14 +1,22 @@
 package com.oanda.v20.v20sample;
 
+import java.util.List;
+
 import com.oanda.v20.Context;
 import com.oanda.v20.account.Account;
-import com.oanda.v20.account.AccountContext;
+import com.oanda.v20.account.AccountGetResponse;
+import com.oanda.v20.account.AccountID;
+import com.oanda.v20.account.AccountListResponse;
 import com.oanda.v20.account.AccountProperties;
 import com.oanda.v20.order.MarketOrderRequest;
-import com.oanda.v20.order.OrderContext;
-import com.oanda.v20.trade.TradeContext;
+import com.oanda.v20.order.OrderCreateRequest;
+import com.oanda.v20.order.OrderCreateResponse;
+import com.oanda.v20.primitives.InstrumentName;
+import com.oanda.v20.trade.TradeCloseResponse;
+import com.oanda.v20.trade.TradeSpecifier;
 import com.oanda.v20.transaction.OrderFillTransaction;
 import com.oanda.v20.transaction.TradeReduce;
+import com.oanda.v20.transaction.TransactionID;
 
 /**
  * This is a brief example that explicitly shows each step in the process of preparing,
@@ -24,18 +32,16 @@ public abstract class StepByStepOrder {
 
     public static void main(String[] args) {
         Context ctx = new Context(Config.url, Config.token);
-        String accountId = Config.accountId;
-        String tradeableInstrument = Config.instrument;
+        AccountID accountId = Config.accountId;
+        InstrumentName tradeableInstrument = Config.instrument;
 
         // EXAMPLE: No parameters
         System.out.println("Make sure we have a valid account");
         try {
-            // Create the request object
-            AccountContext.ListRequest request = ctx.account.list();
             // Execute the request and obtain a response object
-            AccountContext.ListResponse response = request.execute();
+            AccountListResponse response = ctx.account.list();
             // Retrieve account list from response object
-            AccountProperties[] accountProperties;
+            List<AccountProperties> accountProperties;
             accountProperties = response.getAccounts();
             // Check for the configured account
             boolean hasaccount = false;
@@ -52,34 +58,32 @@ public abstract class StepByStepOrder {
         // EXAMPLE: URL path parameter
         System.out.println("Make sure the account has a non zero balance");
         try {
-            // Create the request object
-            AccountContext.GetRequest request = ctx.account.get(accountId);
             // Execute the request and retrieve a response object
-            AccountContext.GetResponse response = request.execute();
+            AccountGetResponse response = ctx.account.get(accountId);
             // Retrieve the contents of the result
             Account account;
             account = response.getAccount();
             // Check the balance
-            if (account.getBalance() <= 0.0)
+            if (account.getBalance().doubleValue() <= 0.0)
                 throw new TestFailureException("Account "+accountId+" balance "+account.getBalance()+" <= 0");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         // EXAMPLE: Complex body parameter
         System.out.println("Place a Market Order");
-        String tradeId;
+        TransactionID tradeId;
         try {
             // Create the new request
-            OrderContext.CreateRequest request = ctx.order.create(accountId);
+            OrderCreateRequest request = new OrderCreateRequest(accountId);
             // Create the required body parameter
             MarketOrderRequest marketorderrequest = new MarketOrderRequest();
             // Populate the body parameter fields
             marketorderrequest.setInstrument(tradeableInstrument);
             marketorderrequest.setUnits(10);
             // Attach the body parameter to the request
-            request.order(marketorderrequest);
+            request.setOrder(marketorderrequest);
             // Execute the request and obtain the response object
-            OrderContext.CreateResponse response = request.execute();
+            OrderCreateResponse response = ctx.order.create(request);
             // Extract the Order Fill transaction for the executed Market Order
             OrderFillTransaction transaction = response.getOrderFillTransaction();
             // Extract the trade ID of the created trade from the transaction and keep it for future action
@@ -90,19 +94,17 @@ public abstract class StepByStepOrder {
         // EXAMPLE: Take action on existing entity
         System.out.println("Close a Trade");
         try {
-            // Create the Close Trade Request
-            TradeContext.CloseRequest request = ctx.trade.close(accountId, tradeId);
             // Execute the request and retrieve the response object
-            TradeContext.CloseResponse response = request.execute();
+            TradeCloseResponse response = ctx.trade.close(accountId, new TradeSpecifier(tradeId.toString()));
             // Extract the order fill transaction describing the trade close action
             OrderFillTransaction transaction = response.getOrderFillTransaction();
             // Extract the list of trades that were closed by the request
-            TradeReduce[] trades = transaction.getTradesClosed();
+            List<TradeReduce> trades = transaction.getTradesClosed();
             // Check if single trade closed
-            if (trades.length != 1)
+            if (trades.size() != 1)
                 throw new TestFailureException("Only 1 trade was expected to be closed");
             // Extract the single closed trade
-            TradeReduce trade = trades[0];
+            TradeReduce trade = trades.get(0);
             // Check if trade closed was the one we asked to be closed
             if (!trade.getTradeID().equals(tradeId))
                 throw new TestFailureException("The wrong trade was closed");
