@@ -28,6 +28,7 @@ import com.oanda.v20.position.PositionCloseRequest;
 import com.oanda.v20.primitives.Instrument;
 import com.oanda.v20.primitives.InstrumentName;
 import com.oanda.v20.trade.Trade;
+import com.oanda.v20.trade.TradeCloseRequest;
 import com.oanda.v20.trade.TradeSetClientExtensionsRequest;
 import com.oanda.v20.trade.TradeSetDependentOrdersRequest;
 import com.oanda.v20.trade.TradeSpecifier;
@@ -51,19 +52,19 @@ import com.oanda.v20.transaction.TransactionType;
  * @author Michael Gentili
  */
 public class TestTradesAndOrders {
-    
-	Context ctx = new Context(Config.url, Config.token);
+
+    Context ctx = new Context(Config.url, Config.token);
     AccountID accountId = Config.accountId;
     InstrumentName tradeableInstrument = Config.instrument;
 
     public static void main(String[] args) {
         try {
-        	new TestTradesAndOrders().runTest();
+            new TestTradesAndOrders().runTest();
         } catch (ExecuteException | RequestException e) {
-        	throw new TestFailureException(e);
+            throw new TestFailureException(e);
         }
     }
-    
+
     private void runTest() throws ExecuteException, RequestException
     {
         System.out.println("TEST - GET /accounts");
@@ -115,7 +116,7 @@ public class TestTradesAndOrders {
         } catch (AccountConfigure400RequestException e) {
             // PASS
         }
-        
+
         // 200 - The Account was configured successfully.
 
         // get /accounts/{accountID}/changes
@@ -162,13 +163,13 @@ public class TestTradesAndOrders {
         System.out.println("CHECK 201 - The Order was created as specified, expecting MarketOrder creation");
         TransactionID orderTransId;
         TransactionID tradeTransId;
-        
+
         OrderCreateResponse resp = ctx.order.create(new OrderCreateRequest(accountId)
-        		.setOrder(new MarketOrderRequest()
+                .setOrder(new MarketOrderRequest()
                     .setInstrument(tradeableInstrument)
                     .setUnits(10)
                 )
-        	);
+            );
         Transaction orderTrans = resp.getOrderCreateTransaction();
         if (orderTrans.getType() != TransactionType.MARKET_ORDER)
             throw new TestFailureException("Created order type "+ orderTrans.getType() + " != MARKET");
@@ -179,12 +180,12 @@ public class TestTradesAndOrders {
         System.out.println("CHECK 200 - The Trade's Client Extensions have been updated as requested, expecting tag and comment to match what was set.");
 
         TradeClientExtensionsModifyTransaction trans = ctx.trade.setClientExtensions(
-        		new TradeSetClientExtensionsRequest(accountId, new TradeSpecifier(tradeTransId))
-        			.setClientExtensions(new ClientExtensions()
-        				.setComment("this is a good trade")
-        				.setTag("good")
-        			)
-        		).getTradeClientExtensionsModifyTransaction();
+                new TradeSetClientExtensionsRequest(accountId, new TradeSpecifier(tradeTransId))
+                    .setClientExtensions(new ClientExtensions()
+                        .setComment("this is a good trade")
+                        .setTag("good")
+                    )
+                ).getTradeClientExtensionsModifyTransaction();
         if (!trans.getTradeClientExtensionsModify().getTag().equals("good"))
             throw new TestFailureException("Tag "+trans.getTradeClientExtensionsModify().getTag()+" != good");
 
@@ -192,9 +193,9 @@ public class TestTradesAndOrders {
         System.out.println("CHECK 200 - The Trade's dependent Orders have been modified as requested, expecting pending TP with matching tradeId");
 
         TakeProfitOrderTransaction tp = ctx.trade.setDependentOrders(
-        		new TradeSetDependentOrdersRequest(accountId, new TradeSpecifier(tradeTransId))
-        			.setTakeProfit(new TakeProfitDetails().setPrice(2.0))
-        		).getTakeProfitOrderTransaction();
+                new TradeSetDependentOrdersRequest(accountId, new TradeSpecifier(tradeTransId))
+                    .setTakeProfit(new TakeProfitDetails().setPrice(2.0))
+                ).getTakeProfitOrderTransaction();
         if (!tp.getTradeID().equals(tradeTransId))
             throw new TestFailureException("Dependent tradeId "+tp.getTradeID()+" != "+tradeTransId);
 
@@ -229,8 +230,9 @@ public class TestTradesAndOrders {
         System.out.println("TEST - PUT /accounts/{accountID}/trades/{tradeSpecifier}/close");
         System.out.println("CHECK 200 - The Trade has been closed as requested, expecting single close trade.");
 
-        List<TradeReduce> reducedTrades = ctx.trade.close(accountId, new TradeSpecifier(tradeTransId))
-        		.getOrderFillTransaction().getTradesClosed();
+        List<TradeReduce> reducedTrades = ctx.trade.close(
+            new TradeCloseRequest(accountId, new TradeSpecifier(tradeTransId))
+        ).getOrderFillTransaction().getTradesClosed();
         if (reducedTrades.size() != 1)
             throw new TestFailureException("Expecting 1 close trade, got "+reducedTrades.size());
         if (!reducedTrades.get(0).getTradeID().equals(tradeTransId))
@@ -254,11 +256,11 @@ public class TestTradesAndOrders {
         System.out.println("CHECK 201 - The Order was created as specified, expecting LimitOrder creation");
 
         resp = ctx.order.create(new OrderCreateRequest(accountId)
-        		.setOrder(
+                .setOrder(
                     new LimitOrderRequest()
-                    	.setInstrument(tradeableInstrument)
-                    	.setUnits(10)
-                    	.setPrice(1.0)
+                        .setInstrument(tradeableInstrument)
+                        .setUnits(10)
+                        .setPrice(1.0)
                 ));
         orderTrans = resp.getOrderCreateTransaction();
         if (orderTrans.getType() != TransactionType.LIMIT_ORDER)
@@ -270,13 +272,13 @@ public class TestTradesAndOrders {
 
         try {
             ctx.order.replace(new OrderReplaceRequest(accountId, new OrderSpecifier(orderTransId))
-            		.setOrder(
-            			new StopOrderRequest()
-            				.setInstrument(tradeableInstrument)
-            				.setUnits(10)
-            				.setPrice(1.0)
-            		)
-            	);
+                    .setOrder(
+                        new StopOrderRequest()
+                            .setInstrument(tradeableInstrument)
+                            .setUnits(10)
+                            .setPrice(1.0)
+                    )
+                );
             throw new TestFailureException("Unexpected success replacing LimitOrder");
         } catch (OrderReplace400RequestException e) {
             System.out.println(e.getErrorCode()+ " " +e.getErrorMessage());
@@ -284,22 +286,22 @@ public class TestTradesAndOrders {
                 throw new TestFailureException("Unexpected errorCode "+e.getErrorCode()+" in expected exception");
             }
         }
-        
+
         System.out.println("CHECK 201 - The Order was successfully cancelled and replaced, expecting triggered and closed LimitOrder");
 
         OrderReplaceResponse replaceResp = ctx.order.replace(
-        	new OrderReplaceRequest(accountId, new OrderSpecifier(orderTransId))
-        		.setOrder(
-        			new LimitOrderRequest()
-        				.setInstrument(tradeableInstrument)
-        				.setUnits(10)
-        				.setPrice(2.0)
-        				.setTakeProfitOnFill(
-        					new TakeProfitDetails()
-        						.setPrice(2.0)
-        				)
-        		)
-        	);
+            new OrderReplaceRequest(accountId, new OrderSpecifier(orderTransId))
+                .setOrder(
+                    new LimitOrderRequest()
+                        .setInstrument(tradeableInstrument)
+                        .setUnits(10)
+                        .setPrice(2.0)
+                        .setTakeProfitOnFill(
+                            new TakeProfitDetails()
+                                .setPrice(2.0)
+                        )
+                )
+            );
         OrderFillTransaction fillTrans = replaceResp.getOrderFillTransaction();
         double units = fillTrans.getTradeOpened().getUnits().doubleValue();
         if (units != 10)
@@ -343,7 +345,7 @@ public class TestTradesAndOrders {
 
         fillTrans = ctx.position.close(new PositionCloseRequest(accountId, tradeableInstrument)
                 .setLongUnits("ALL")
-        	).getLongOrderFillTransaction();
+            ).getLongOrderFillTransaction();
         if (fillTrans.getUnits().doubleValue() != -10)
             throw new TestFailureException("Position units "+fillTrans.getUnits()+"!= -10");
 
