@@ -53,9 +53,9 @@ import com.oanda.v20.transaction.TransactionType;
  */
 public class TestTradesAndOrders {
 
-    Context ctx = new Context(Config.url, Config.token);
-    AccountID accountId = Config.accountId;
-    InstrumentName tradeableInstrument = Config.instrument;
+    Context ctx = new Context(Config.URL, Config.TOKEN);
+    AccountID accountId = Config.ACCOUNTID;
+    InstrumentName tradeableInstrument = Config.INSTRUMENT;
 
     public static void main(String[] args) {
         try {

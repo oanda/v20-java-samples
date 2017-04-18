@@ -26,8 +26,8 @@ import com.oanda.v20.transaction.TransactionID;
 public class AccountUpdateLoop {
 
     public static void main(String[] args) {
-        Context ctx = new Context(Config.url, Config.token);
-        AccountID accountId = Config.accountId;
+        Context ctx = new Context(Config.URL, Config.TOKEN);
+        AccountID accountId = Config.ACCOUNTID;
 
         // Get initial account state
         try {
@@ -62,12 +62,13 @@ public class AccountUpdateLoop {
 
         for (Order order : account.getOrders())
             ordermap.put(order.getId(), order);
+
+        for (Order created : changes.getOrdersCreated())
+            ordermap.put(created.getId(), created);
         for (Order cancelled : changes.getOrdersCancelled())
             ordermap.remove(cancelled.getId());
         for (Order filled : changes.getOrdersFilled())
             ordermap.remove(filled.getId());
-        for (Order created : changes.getOrdersCreated())
-            ordermap.put(created.getId(), created);
         for (Order triggered : changes.getOrdersTriggered())
             ordermap.remove(triggered.getId());
 
@@ -77,45 +78,67 @@ public class AccountUpdateLoop {
 
         for (TradeSummary trade : account.getTrades())
             trademap.put(trade.getId(), trade);
-        for (TradeSummary closed : changes.getTradesClosed())
-            trademap.remove(closed.getId());
+
         for (TradeSummary opened : changes.getTradesOpened())
             trademap.put(opened.getId(), opened);
         for (TradeSummary reduced : changes.getTradesReduced())
             trademap.put(reduced.getId(),reduced);
+        for (TradeSummary closed : changes.getTradesClosed())
+            trademap.remove(closed.getId());
 
         account.setTrades(trademap.values());
 
-        Map<InstrumentName, Position> posmap = new HashMap<>();
-        for (Position pos : account.getPositions())
-            posmap.put(pos.getInstrument(), pos);
-
-        account.setPositions(posmap.values());
+        account.setPositions(changes.getPositions());
     }
 
     private static void applyAccountChangesState(
             Account account, AccountChangesState updatedstate
     ) {
-        account.setUnrealizedPL(updatedstate.getUnrealizedPL());
-        account.setNAV(updatedstate.getNAV());
-        account.setMarginUsed(updatedstate.getMarginUsed());
-        account.setMarginAvailable(updatedstate.getMarginAvailable());
-        account.setPositionValue(updatedstate.getPositionValue());
-        account.setMarginCloseoutUnrealizedPL(updatedstate.getMarginCloseoutUnrealizedPL());
-        account.setMarginCloseoutNAV(updatedstate.getMarginCloseoutNAV());
-        account.setMarginCloseoutMarginUsed(updatedstate.getMarginCloseoutMarginUsed());
-        account.setMarginCloseoutPercent(updatedstate.getMarginCloseoutPercent());
-        account.setMarginCloseoutPositionValue(updatedstate.getMarginCloseoutPositionValue());
-        account.setWithdrawalLimit(updatedstate.getWithdrawalLimit());
-        account.setMarginCallMarginUsed(updatedstate.getMarginCallMarginUsed());
-        account.setMarginCallPercent(updatedstate.getMarginCallPercent());
+        if (updatedstate.getUnrealizedPL() != null)
+            account.setUnrealizedPL(updatedstate.getUnrealizedPL());
+        if (updatedstate.getNAV() != null)
+            account.setNAV(updatedstate.getNAV());
+        if (updatedstate.getMarginUsed() != null)
+            account.setMarginUsed(updatedstate.getMarginUsed());
+        if (updatedstate.getMarginAvailable() != null)
+            account.setMarginAvailable(updatedstate.getMarginAvailable());
+        if (updatedstate.getPositionValue() != null)
+            account.setPositionValue(updatedstate.getPositionValue());
+        if (updatedstate.getMarginCloseoutUnrealizedPL() != null)
+            account.setMarginCloseoutUnrealizedPL(
+                updatedstate.getMarginCloseoutUnrealizedPL()
+            );
+        if (updatedstate.getMarginCloseoutNAV() != null)
+            account.setMarginCloseoutNAV(updatedstate.getMarginCloseoutNAV());
+        if (updatedstate.getMarginCloseoutMarginUsed() != null)
+            account.setMarginCloseoutMarginUsed(
+                updatedstate.getMarginCloseoutMarginUsed()
+            );
+        if (updatedstate.getMarginCloseoutPercent() != null)
+            account.setMarginCloseoutPercent(
+                updatedstate.getMarginCloseoutPercent()
+            );
+        if (updatedstate.getMarginCloseoutPositionValue() != null)
+            account.setMarginCloseoutPositionValue(
+                updatedstate.getMarginCloseoutPositionValue()
+            );
+        if (updatedstate.getWithdrawalLimit() != null)
+            account.setWithdrawalLimit(updatedstate.getWithdrawalLimit());
+        if (updatedstate.getMarginCallMarginUsed() != null)
+            account.setMarginCallMarginUsed(
+                updatedstate.getMarginCallMarginUsed()
+            );
+        if (updatedstate.getMarginCallPercent() != null)
+            account.setMarginCallPercent(updatedstate.getMarginCallPercent());
 
         Map<OrderID, Order> ordermap = new HashMap<>();
 
         for (Order order : account.getOrders())
             ordermap.put(order.getId(), order);
         for (DynamicOrderState orderstate : updatedstate.getOrders()) {
-            TrailingStopLossOrder order = (TrailingStopLossOrder) ordermap.get(orderstate.getId());
+            TrailingStopLossOrder order = (TrailingStopLossOrder) ordermap.get(
+                orderstate.getId()
+            );
             order.setTrailingStopValue(orderstate.getTrailingStopValue());
         }
 

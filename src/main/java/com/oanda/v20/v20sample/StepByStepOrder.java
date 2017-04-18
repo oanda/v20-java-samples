@@ -12,6 +12,7 @@ import com.oanda.v20.order.MarketOrderRequest;
 import com.oanda.v20.order.OrderCreateRequest;
 import com.oanda.v20.order.OrderCreateResponse;
 import com.oanda.v20.primitives.InstrumentName;
+import com.oanda.v20.trade.TradeCloseRequest;
 import com.oanda.v20.trade.TradeCloseResponse;
 import com.oanda.v20.trade.TradeSpecifier;
 import com.oanda.v20.transaction.OrderFillTransaction;
@@ -31,9 +32,9 @@ import com.oanda.v20.transaction.TransactionID;
 public abstract class StepByStepOrder {
 
     public static void main(String[] args) {
-        Context ctx = new Context(Config.url, Config.token);
-        AccountID accountId = Config.accountId;
-        InstrumentName tradeableInstrument = Config.instrument;
+        Context ctx = new Context(Config.URL, Config.TOKEN);
+        AccountID accountId = Config.ACCOUNTID;
+        InstrumentName tradeableInstrument = Config.INSTRUMENT;
 
         // EXAMPLE: No parameters
         System.out.println("Make sure we have a valid account");
@@ -95,7 +96,8 @@ public abstract class StepByStepOrder {
         System.out.println("Close a Trade");
         try {
             // Execute the request and retrieve the response object
-            TradeCloseResponse response = ctx.trade.close(accountId, new TradeSpecifier(tradeId.toString()));
+            TradeCloseResponse response = ctx.trade.close(
+            		new TradeCloseRequest(accountId, new TradeSpecifier(tradeId.toString())));
             // Extract the order fill transaction describing the trade close action
             OrderFillTransaction transaction = response.getOrderFillTransaction();
             // Extract the list of trades that were closed by the request
