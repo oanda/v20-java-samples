@@ -13,7 +13,6 @@ import com.oanda.v20.primitives.InstrumentName;
  *                         permissions to take action on
  * @param      INSTRUMENT  A valid tradeable instrument for the given {@code
  *                         ACCOUNTID}
- * @author     gentili
  */
 public class Config {
     private Config() {}

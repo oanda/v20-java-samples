@@ -58,6 +58,9 @@ public class AccountUpdateLoop {
     private static void applyAccountChanges(
             Account account, AccountChanges changes
     ) {
+        System.out.println("Account Changes:");
+        System.out.println(changes);
+
         Map<OrderID, Order> ordermap = new HashMap<>();
 
         for (Order order : account.getOrders())
@@ -88,12 +91,23 @@ public class AccountUpdateLoop {
 
         account.setTrades(trademap.values());
 
-        account.setPositions(changes.getPositions());
+        Map<InstrumentName, Position> positionMap = new HashMap<>();
+
+        for (Position position : account.getPositions())
+            positionMap.put(position.getInstrument(), position);
+
+        for (Position position : changes.getPositions())
+            positionMap.put(position.getInstrument(), position);
+
+        account.setPositions(positionMap.values());
     }
 
     private static void applyAccountChangesState(
             Account account, AccountChangesState updatedstate
     ) {
+        System.out.println("Account Changes State:");
+        System.out.println(updatedstate);
+
         if (updatedstate.getUnrealizedPL() != null)
             account.setUnrealizedPL(updatedstate.getUnrealizedPL());
         if (updatedstate.getNAV() != null)
