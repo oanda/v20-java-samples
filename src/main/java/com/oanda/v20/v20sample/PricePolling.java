@@ -17,7 +17,7 @@ public class PricePolling {
         Context ctx = new Context(Config.URL, Config.TOKEN);
         AccountID accountId = Config.ACCOUNTID;
         List<String> instruments = new ArrayList<>(
-                Arrays.asList("EUR_USD", "USD/JPY", "GBP/USD", "USD/CHF"));
+                Arrays.asList("EUR_USD", "USD_JPY", "GBP_USD", "USD_CHF"));
 
         // Poll for prices
         try {
