@@ -41,7 +41,7 @@
     <dependency>
       <groupId>com.oanda.v20</groupId>
       <artifactId>v20</artifactId>
-      <version>3.0.20</version>
+      <version>3.0.23</version>
     </dependency>
   </dependencies>
 

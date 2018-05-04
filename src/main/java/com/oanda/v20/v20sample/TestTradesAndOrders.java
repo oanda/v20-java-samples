@@ -1,6 +1,5 @@
 package com.oanda.v20.v20sample;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,7 +10,6 @@ import com.oanda.v20.account.Account;
 import com.oanda.v20.account.AccountConfigure400RequestException;
 import com.oanda.v20.account.AccountConfigureResponse;
 import com.oanda.v20.account.AccountID;
-import com.oanda.v20.account.AccountInstrumentsRequest;
 import com.oanda.v20.account.AccountProperties;
 import com.oanda.v20.order.LimitOrderRequest;
 import com.oanda.v20.order.MarketOrderRequest;
@@ -28,7 +26,7 @@ import com.oanda.v20.order.OrderType;
 import com.oanda.v20.order.StopOrderRequest;
 import com.oanda.v20.position.Position;
 import com.oanda.v20.position.PositionCloseRequest;
-import com.oanda.v20.pricing.Price;
+import com.oanda.v20.pricing.ClientPrice;
 import com.oanda.v20.primitives.Instrument;
 import com.oanda.v20.primitives.InstrumentName;
 import com.oanda.v20.trade.Trade;
@@ -38,6 +36,7 @@ import com.oanda.v20.trade.TradeSetDependentOrdersRequest;
 import com.oanda.v20.trade.TradeSpecifier;
 import com.oanda.v20.trade.TradeState;
 import com.oanda.v20.transaction.ClientExtensions;
+import com.oanda.v20.transaction.OrderCancelTransaction;
 import com.oanda.v20.transaction.OrderFillTransaction;
 import com.oanda.v20.transaction.TakeProfitDetails;
 import com.oanda.v20.transaction.TakeProfitOrderTransaction;
@@ -203,11 +202,21 @@ public class TestTradesAndOrders {
         if (!tp.getTradeID().equals(tradeTransId))
             throw new TestFailureException("Dependent tradeId "+tp.getTradeID()+" != "+tradeTransId);
 
+        System.out.println("TEST - PUT /accounts/{accountID}/trades/{tradeSpecifier}/orders");
+        System.out.println("CHECK 200 - The Trade's dependent Orders have been modified as requested, expecting TP to be removed");
+
+        OrderCancelTransaction oc = ctx.trade.setDependentOrders(
+                new TradeSetDependentOrdersRequest(accountId, new TradeSpecifier(tradeTransId))
+                    .setTakeProfit(null)
+                ).getTakeProfitOrderCancelTransaction();
+        if (!oc.getOrderID().equals(tp.getId()))
+            throw new TestFailureException("Dependent orderId "+oc.getOrderID()+" != "+tp.getId());
+
         System.out.println("TEST - GET /accounts/{accountID}/pricing/{instruments}");
         System.out.println("CHECK 200 - Pricing information has been successfully provided.");
 
         String[] instrumentNames = {"USD_CAD", "GBP_USD"};
-        List<Price> prices = ctx.pricing.get(accountId, Arrays.asList(instrumentNames)).getPrices();
+        List<ClientPrice> prices = ctx.pricing.get(accountId, Arrays.asList(instrumentNames)).getPrices();
 
         System.out.println("TEST - GET /accounts/{accountID}/orders/{orderSpecifier}");
         System.out.println("CHECK 200 - The details of the Order requested match the order placed, expecting FILLED MARKET order.");

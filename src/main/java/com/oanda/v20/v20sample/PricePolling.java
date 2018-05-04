@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.oanda.v20.Context;
 import com.oanda.v20.account.AccountID;
-import com.oanda.v20.pricing.Price;
+import com.oanda.v20.pricing.ClientPrice;
 import com.oanda.v20.pricing.PricingGetRequest;
 import com.oanda.v20.pricing.PricingGetResponse;
 import com.oanda.v20.primitives.DateTime;
@@ -33,7 +33,7 @@ public class PricePolling {
                 }
                 PricingGetResponse resp = ctx.pricing.get(request);
 
-                for (Price price : resp.getPrices())
+                for (ClientPrice price : resp.getPrices())
                     System.out.println(price);
                 since = resp.getTime();
 
