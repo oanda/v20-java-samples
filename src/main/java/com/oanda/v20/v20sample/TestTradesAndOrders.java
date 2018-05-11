@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.oanda.v20.Context;
+import com.oanda.v20.ContextBuilder;
 import com.oanda.v20.ExecuteException;
 import com.oanda.v20.RequestException;
 import com.oanda.v20.account.Account;
@@ -56,7 +57,11 @@ import com.oanda.v20.transaction.TransactionType;
  */
 public class TestTradesAndOrders {
 
-    Context ctx = new Context(Config.URL, Config.TOKEN);
+    Context ctx = new ContextBuilder(Config.URL)
+    		.setToken(Config.TOKEN)
+    		.setApplication("TestTradesAndOrders")
+    		.build();
+    
     AccountID accountId = Config.ACCOUNTID;
     InstrumentName tradeableInstrument = Config.INSTRUMENT;
 

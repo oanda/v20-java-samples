@@ -3,6 +3,7 @@ package com.oanda.v20.v20sample;
 import java.util.List;
 
 import com.oanda.v20.Context;
+import com.oanda.v20.ContextBuilder;
 import com.oanda.v20.account.Account;
 import com.oanda.v20.account.AccountGetResponse;
 import com.oanda.v20.account.AccountID;
@@ -32,7 +33,11 @@ import com.oanda.v20.transaction.TransactionID;
 public abstract class StepByStepOrder {
 
     public static void main(String[] args) {
-        Context ctx = new Context(Config.URL, Config.TOKEN);
+        Context ctx = new ContextBuilder(Config.URL)
+        		.setToken(Config.TOKEN)
+        		.setApplication("StepByStepOrder")
+        		.build();
+        
         AccountID accountId = Config.ACCOUNTID;
         InstrumentName tradeableInstrument = Config.INSTRUMENT;
 

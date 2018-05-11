@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.oanda.v20.Context;
+import com.oanda.v20.ContextBuilder;
 import com.oanda.v20.account.Account;
 import com.oanda.v20.account.AccountChanges;
 import com.oanda.v20.account.AccountChangesRequest;
@@ -26,7 +27,11 @@ import com.oanda.v20.transaction.TransactionID;
 public class AccountUpdateLoop {
 
     public static void main(String[] args) {
-        Context ctx = new Context(Config.URL, Config.TOKEN);
+        Context ctx = new ContextBuilder(Config.URL)
+        		.setToken(Config.TOKEN)
+        		.setApplication("AccountUpdateLoop")
+        		.build();
+        
         AccountID accountId = Config.ACCOUNTID;
 
         // Get initial account state
